@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Interface</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="map_style.css">
+    <style>
+        #map {
+            height: 700px;
+            width: 74%;
+        }
+    </style>
+    <!-- Add manifest for PWA -->
+    <link rel="manifest" href="User_manifest.json">
+</head>
+<body>
+
+    <h1>User Interface</h1>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <script>
+        // Sample data - replace this with your actual data
+        const specialBins = [
+            { name: "Bin 1", lat: 17.6052, lng: 78.4868 }
+            // Add more bins as needed
+        ];
+
+        // Initialize the map
+        const map = L.map('map').setView([0, 0], 2);
+
+        // Add OpenStreetMap layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add markers for each special bin
+        specialBins.forEach(bin => {
+            const marker = L.marker([bin.lat, bin.lng]).addTo(map);
+            marker.bindPopup(bin.name);
+        });
+
+        // Check if geolocation is supported
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(onLocationSuccess, onLocationError);
+        } else {
+            alert("Geolocation is not supported by your browser");
+        }
+
+        // Handle successful geolocation
+        function onLocationSuccess(position) {
+            const userLocation = [position.coords.latitude, position.coords.longitude];
+
+            // Find the nearest bin
+            const nearestBin = findNearestBin(userLocation);
+
+            // Add a marker for the user's location
+            const userMarker = L.marker(userLocation, { icon: L.divIcon({ className: 'user-marker' }) }).addTo(map);
+
+            // Add a line between user and nearest bin
+            const polyline = L.polyline([userLocation, [nearestBin.lat, nearestBin.lng]], { color: 'blue' }).addTo(map);
+
+            // Zoom to fit the markers
+            map.fitBounds([userLocation, [nearestBin.lat, nearestBin.lng]]);
+
+            // Show the distance between user and bin in the popup
+            userMarker.bindPopup(`Your location<br>Nearest Bin: ${nearestBin.name}<br>Distance: ${calculateDistance(userLocation, [nearestBin.lat, nearestBin.lng])} meters`).openPopup();
+        }
+
+        // Handle geolocation error
+        function onLocationError(error) {
+            alert(`Error getting your location: ${error.message}`);
+        }
+
+        // Function to find the nearest bin
+        function findNearestBin(userLocation) {
+            let nearestBin = specialBins[0];
+            let minDistance = calculateDistance(userLocation, [nearestBin.lat, nearestBin.lng]);
+
+            for (let i = 1; i < specialBins.length; i++) {
+                const distance = calculateDistance(userLocation, [specialBins[i].lat, specialBins[i].lng]);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestBin = specialBins[i];
+                }
+            }
+
+            return nearestBin;
+        }
+
+        // Function to calculate distance between two points (Haversine formula)
+        function calculateDistance(point1, point2) {
+            const R = 6371; // Radius of the Earth in kilometers
+            const dLat = deg2rad(point2[0] - point1[0]);
+            const dLon = deg2rad(point2[1] - point1[1]);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(point1[0])) * Math.cos(deg2rad(point2[0])) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c * 1000; // Convert to meters
+            return distance;
+        }
+
+        // Function to convert degrees to radians
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+body {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+    background-color: #333;
+    color: #fff;
+    margin: 0;
+}
+
+#map {
+    height: 600px; /* Increased height for better visibility */
+    width: 74%;
+    
+}
+
+.user-marker {
+    background-color: #4285f4; /* Google Maps blue */
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    margin: -7px 0 0 -7px;
+}
+
+.leaflet-popup-content {
+    text-align: center;
+}
+
+.leaflet-popup-content-wrapper {
+    background: #fff;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.4);
+}
+
+.leaflet-popup-content h2 {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.leaflet-popup-content p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.leaflet-popup-tip-container {
+    display: none; /* Hide default tip */
+}
